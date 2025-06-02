@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPT Chat</title>
+  <style>
+    body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+    #chat { max-width: 700px; margin: auto; }
+    .msg { margin: 10px 0; }
+    .user { color: #66ccff; }
+    .bot { color: #99ff99; }
+    input, button {
+      padding: 10px; width: 80%; margin-top: 10px;
+      border: none; border-radius: 5px;
+    }
+    button { width: 18%; background: #333; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+  <input type="text" id="prompt" placeholder="Ask anything..." autofocus>
+  <button onclick="send()">Send</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+
+    async function send() {
+      const input = document.getElementById("prompt");
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      chat.innerHTML += `<div class="msg user"><b>You:</b> ${prompt}</div>`;
+      input.value = "";
+
+      try {
+        const res = await fetch("https://your-api.onrender.com/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: prompt })
+        });
+        const data = await res.json();
+        chat.innerHTML += `<div class="msg bot"><b>Bot:</b> ${data.reply}</div>`;
+      } catch (err) {
+        chat.innerHTML += `<div class="msg bot"><b>Bot:</b> Error: ${err.message}</div>`;
+      }
+    }
+
+    document.getElementById("prompt").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") send();
+    });
+  </script>
+</body>
+</html>

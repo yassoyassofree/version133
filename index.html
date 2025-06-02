@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>School Invincible</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00ff00" />
+
+<style>
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(45deg, #063258, #1c2f30, #063258, #1c2f30);
+    background-size: 400% 400%;
+    animation: moveBackground 15s ease infinite;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    text-align: center;
+}
+
+.install-button {
+    display: block;
+    margin-bottom: 20px;
+    background: #00ff00;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.2);
+    width: 100%;
+}
+
+.install-button:hover {
+    background: #00cc00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 255, 0, 0.3);
+}
+
+.install-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.2);
+}
+
+.install-status {
+    display: inline-block;
+    transition: opacity 0.3s;
+}
+
+.install-spinner {
+    margin-left: 10px;
+    font-size: 1.2em;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.install-button:hover {
+    background: #00cc00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 255, 0, 0.3);
+}
+
+.install-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.2);
+}
+
+.container {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #00ff00;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(12px);
+    display: none;
+    margin: 20px auto;
+}
+
+#login-container { display: block; }
+#register-container { display: none; }
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 12px 0;
+    border: 2px solid #00ff00;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #00cc00;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin: 12px 0;
+    border: none;
+    background: #00ff00;
+    color: #000;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+button:hover {
+    background: #00cc00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 255, 0, 0.3);
+}
+
+button.secondary {
+    background-color: #666;
+    color: #fff;
+}
+
+button.secondary:hover {
+    background-color: #888;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 25px;
+    border-radius: 10px;
+    z-index: 1000;
+    text-align: center;
+    font-weight: bold;
+}
+
+.loading.show {
+    display: block;
+}
+
+
+
+h1, h2 {
+    margin-bottom: 20px;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 800px;
+    width: 90%;
+    color: #000;
+}
+.modal table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.modal th, .modal td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+.modal th {
+    background-color: #f5f5f5;
+}
+.modal button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4facfe;
+    color: white;
+}
+.modal button:hover {
+    background-color: #00f2fe;
+}
+.modal button.reject {
+    background-color: #ff6b6b;
+}
+.modal button.reject:hover {
+    background-color: #ff5252;
+}
+
+/* Loading overlay styles */
+.loading-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.loading-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+.video-container {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    margin: 20px auto;
+}
+.video-container iframe {
+    width: 100%;
+    height: 315px;
+    border-radius: 10px;
+}
+.video-overlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-container" id="login-container">
+      <form id="loginForm" onsubmit="return handleLogin(event)">
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit">Login</button>
+        <button id="installButton" class="install-button" style="display: block; margin-bottom: 20px;">
+          <span class="install-status">Install School Invincible</span>
+          <span class="install-spinner" style="display: none;">⏳</span>
+        </button>
+        <button id="show-register-btn" class="toggle-btn">Register</button>
+      </form>
+    </div>
+
+    
+    <div class="register-container" id="register-container" style="display: none;">
+      <form id="registerForm" onsubmit="return handleRegister(event)">
+        <input type="text" id="registerUsername" placeholder="Username" required>
+        <input type="password" id="registerPassword" placeholder="Password" required>
+        <button type="submit">Register</button>
+        <button id="show-login-btn" class="toggle-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+<!-- Scripts -->
+>
+<script>
+// Load users from localStorage
+let users = [];
+
+function loadUsers() {
+    try {
+        const savedUsers = localStorage.getItem('users');
+        if (savedUsers) {
+            users = JSON.parse(savedUsers);
+        } else {
+            // Default admin user
+            users = [
+                { 
+                    name: "admin",
+                    id: "1000",
+                    password: "admin123",
+                    blocked: false,
+                    role: "admin",
+                    status: "active"
+                }
+            ];
+            saveUsers();
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        users = [
+            { 
+                name: "admin",
+                id: "1000",
+                password: "admin123",
+                blocked: false,
+                role: "admin",
+                status: "active"
+            }
+        ];
+        saveUsers();
+    }
+}
+
+function saveUsers() {
+    try {
+        localStorage.setItem('users', JSON.stringify(users));
+    } catch (error) {
+        console.error('Error saving users:', error);
+    }
+}
+
+// Show login form
+const showLoginForm = () => {
+  const container = document.querySelector('.container');
+  if (container) {
+    container.style.display = 'block';
+    container.style.opacity = '0';
+    
+    setTimeout(() => {
+      container.style.opacity = '1';
+    }, 10);
+  }
+};
+
+// Add a fallback icon if SVG doesn't load
+const fallbackIcon = () => {
+  const link = document.querySelector('link[rel="icon"]');
+  if (link) {
+    link.href = '/icons/icon-192.png';
+    
+    // Create a fallback icon element if it doesn't exist
+    if (!document.getElementById('fallbackIcon')) {
+      const fallback = document.createElement('link');
+      fallback.id = 'fallbackIcon';
+      fallback.rel = 'icon';
+      fallback.href = '/icons/icon-192.png';
+      document.head.appendChild(fallback);
+    }
+  }
+};
+
+// Load PNG icon
+const testIcon = new Image();
+const iconPath = 'icons/icon-192.png';
+testIcon.src = iconPath;
+testIcon.onload = () => {
+  console.log('PNG icon loaded successfully');
+};
+testIcon.onerror = () => {
+  console.error('Icon failed to load');
+  // Use default browser icon
+  document.querySelectorAll('link[rel="icon"]').forEach(link => {
+    link.href = '';
+  });
+};
+
+// Add a fallback icon link in case the manifest fails
+if (!document.querySelector('link[rel="icon"]')) {
+  const link = document.createElement('link');
+  link.rel = 'icon';
+  link.href = '/icons/icon-192.png';
+  document.head.appendChild(link);
+}
+
+// Show registration form
+function showRegisterForm() {
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('register-container').style.display = 'block';
+}
+
+// Initialize PWA installation
+let deferredPrompt;
+const installButton = document.getElementById('installButton');
+
+// Check if PWA is installable
+function checkPWAInstallable() {
+    if (!('serviceWorker' in navigator)) {
+        console.log('Service Worker is not supported');
+        return false;
+    }
+    if (!('beforeinstallprompt' in window)) {
+        console.log('beforeinstallprompt is not supported');
+        return false;
+    }
+    return true;
+}
+
+// Test icon loading
+function testIconLoad() {
+    const testIcon = new Image();
+    testIcon.onload = () => {
+        console.log('SVG icon loaded successfully');
+    };
+    testIcon.onerror = () => {
+        console.error('SVG icon failed to load');
+        installButton.style.display = 'none';
+    };
+    testIcon.src = '/icons/icon-192.svg';
+}
+
+// Handle beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt detected');
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Show install button with animation
+    installButton.style.display = 'block';
+    installButton.style.opacity = '0';
+    setTimeout(() => {
+        installButton.style.opacity = '1';
+    }, 100);
+});
+
+// Handle install button click
+installButton.addEventListener('click', async () => {
+    const statusSpan = installButton.querySelector('.install-status');
+    const spinner = installButton.querySelector('.install-spinner');
+    
+    if (deferredPrompt) {
+        // Show loading state
+        statusSpan.style.opacity = '0';
+        setTimeout(() => {
+            statusSpan.textContent = 'Installing...';
+            statusSpan.style.opacity = '1';
+            spinner.style.display = 'inline-block';
+        }, 300);
+        
+        try {
+            const result = await deferredPrompt.prompt();
+            if (result.outcome === 'accepted') {
+                console.log('App installed');
+                statusSpan.textContent = 'Installed!';
+                spinner.style.display = 'none';
+                installButton.style.opacity = '0.5';
+                installButton.style.cursor = 'default';
+                installButton.disabled = true;
+            } else {
+                console.log('App installation dismissed');
+                statusSpan.textContent = 'Install School Invincible';
+                spinner.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Install prompt error:', error);
+            statusSpan.textContent = 'Install failed';
+            spinner.style.display = 'none';
+        }
+        deferredPrompt = null;
+    } else {
+        console.log('No deferred prompt available');
+        statusSpan.textContent = 'Install not available';
+        spinner.style.display = 'none';
+    }
+});
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js', {
+        scope: '/',
+        updateViaCache: 'none'
+    })
+    .then((registration) => {
+        console.log('Service Worker registered!');
+        console.log('Registration scope:', registration.scope);
+        
+        // Check if service worker is active
+        if (registration.active) {
+            console.log('Service Worker is active');
+        } else {
+            console.log('Waiting for Service Worker to become active...');
+        }
+
+        // Add service worker event listeners
+        registration.installing?.addEventListener('statechange', (event) => {
+            console.log('Service Worker state:', event.target.state);
+        });
+
+        registration.waiting?.addEventListener('statechange', (event) => {
+            console.log('Service Worker waiting state:', event.target.state);
+        });
+
+        registration.active?.addEventListener('statechange', (event) => {
+            console.log('Service Worker active state:', event.target.state);
+        });
+
+        // Add message listener for service worker
+        registration.active?.addEventListener('message', (event) => {
+            console.log('Service Worker message:', event.data);
+        });
+    })
+    .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+        // Fallback if service worker fails
+        installButton.style.display = 'none';
+    });
+} else {
+    console.log('Service Worker is not supported in this browser');
+    installButton.style.display = 'none';
+}
+
+// Check PWA installability on load
+window.addEventListener('load', () => {
+    // Test icon loading first
+    testIconLoad();
+
+    // Check if PWA is installable
+    if (!checkPWAInstallable()) {
+        installButton.style.display = 'none';
+        return;
+    }
+
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        installButton.style.display = 'none';
+        return;
+    }
+
+    // Check if we have a valid deferred prompt
+    if (!deferredPrompt) {
+        installButton.style.display = 'none';
+        return;
+    }
+
+    // Show install button with animation
+    installButton.style.display = 'block';
+    installButton.style.opacity = '0';
+    setTimeout(() => {
+        installButton.style.opacity = '1';
+    }, 100);
+
+    // Check if manifest is loaded
+    fetch('/manifest.json')
+        .then(response => {
+            if (!response.ok) {
+                console.error('Failed to load manifest');
+                installButton.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Manifest error:', error);
+            installButton.style.display = 'none';
+        });
+});
+
+// Add event listener for PWA install state changes
+window.addEventListener('appinstalled', (event) => {
+    console.log('App was installed:', event);
+    installButton.style.display = 'none';
+});
+
+// Add event listener for offline state
+window.addEventListener('offline', () => {
+    console.log('App is offline');
+});
+
+// Add event listener for online state
+window.addEventListener('online', () => {
+    console.log('App is online');
+});
+
+// Update install button text based on service worker status
+navigator.serviceWorker.ready.then((registration) => {
+    if (registration.installing) {
+        installButton.textContent = 'Installing...';
+    } else if (registration.waiting) {
+        installButton.textContent = 'Waiting...';
+    } else if (registration.active) {
+        installButton.textContent = 'Ready to install';
+    }
+});
+
+// Add event listener for PWA install state changes
+window.addEventListener('appinstalled', (event) => {
+    console.log('App was installed:', event);
+});
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+    loadUsers();
+    // Show login form by default
+    showLoginForm();
+
+    // Add toggle buttons if they don't exist
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    if (!document.getElementById('show-register-btn')) {
+        const registerBtn = document.createElement('button');
+        registerBtn.id = 'show-register-btn';
+        registerBtn.className = 'toggle-btn';
+        registerBtn.textContent = 'Register';
+        loginForm.appendChild(registerBtn);
+    }
+    
+    if (!document.getElementById('show-login-btn')) {
+        const loginBtn = document.createElement('button');
+        loginBtn.id = 'show-login-btn';
+        loginBtn.className = 'toggle-btn';
+        loginBtn.textContent = 'Login';
+        registerForm.appendChild(loginBtn);
+    }
+
+    // Attach button events
+    const registerBtn = document.getElementById('show-register-btn');
+    const loginBtn = document.getElementById('show-login-btn');
+    
+    if (registerBtn) {
+        registerBtn.addEventListener('click', showRegisterForm);
+    }
+    if (loginBtn) {
+        loginBtn.addEventListener('click', showLoginForm);
+    }
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === '=') {
+            event.preventDefault();
+            checkPendingApprovals();
+        } else if (event.ctrlKey && event.key.toLowerCase() === 'b') {
+            event.preventDefault();
+            window.location.href = 'https://classroom.google.com/';
+        } else if (event.ctrlKey && event.key === '\\') {
+            event.preventDefault();
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = users.find(u => u.name === currentUser);
+                if (user && user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('Access denied. Only administrators can access the admin panel.');
+                }
+            } else {
+                alert('Please login first to access the admin panel.');
+            }
+        } else if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            // Show video overlay
+            showVideoOverlay();
+
+            // After login, redirect to welcome if active
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = users.find(u => u.name === currentUser);
+                if (user && user.status === 'active') {
+                    window.location.href = 'welcome.html';
+                } else {
+                    alert('Please login first or wait for account approval.');
+                }
+            } else {
+                alert('Please login first or wait for account approval.');
+            }
+        }
+    });
+});
+
+// Show video overlay
+function showVideoOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'video-overlay';
+    overlay.innerHTML = `
+        <div class="video-container">
+            <iframe 
+                width="560" 
+                height="315" 
+                src="https://www.youtube.com/embed/uBBDMqZKagY?autoplay=1&mute=1" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen
+            ></iframe>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.onclick = () => overlay.remove();
+}
+
+// Check pending approvals
+function checkPendingApprovals() {
+    const pendingUsers = users.filter(u => u.status === 'pending');
+    if (pendingUsers.length > 0) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>Pending Approvals (${pendingUsers.length})</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Registration Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-users-tbody"></tbody>
+                </table>
+                <button onclick="this.closest('.modal').remove();">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const tbody = document.getElementById('pending-users-tbody');
+        pendingUsers.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.name}</td>
+                <td>${user.email || 'N/A'}</td>
+                <td>${user.registrationDate ? new Date(user.registrationDate).toLocaleString() : 'N/A'}</td>
+                <td>
+                    <button onclick="approveUser('${user.id}')">Approve</button>
+                    <button onclick="rejectUser('${user.id}')">Reject</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } else {
+        alert('No pending approvals at this time.');
+    }
+}
+
+function approveUser(userId) {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+        user.status = 'active';
+        saveUsers();
+        alert(`User ${user.name} has been approved!`);
+        document.querySelector('.modal')?.remove();
+        checkPendingApprovals();
+    }
+}
+
+function rejectUser(userId) {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+        user.status = 'rejected';
+        user.blocked = true;
+        saveUsers();
+        alert(`User ${user.name} has been rejected and blocked.`);
+        document.querySelector('.modal')?.remove();
+        checkPendingApprovals();
+    }
+}
+
+// Registration
+async function registerUser() {
+    const username = document.getElementById('reg-username').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
+    const confirmPassword = document.getElementById('reg-confirm-password').value.trim();
+
+    if (!username || !password || !confirmPassword || !email) {
+        alert("Please fill in all fields.");
+        return false;
+    }
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return false;
+    }
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters long.");
+        return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert("Please enter a valid email address.");
+        return false;
+    }
+    if (users.some(u => u.name.toLowerCase() === username.toLowerCase())) {
+        alert("Username already exists. Please choose another.");
+        return false;
+    }
+
+    // Show loading screen with video
+    const loadingScreen = document.createElement('div');
+    loadingScreen.className = 'loading-screen';
+    loadingScreen.innerHTML = `
+        <div class="loading-content">
+            <div class="video-container">
+                <iframe 
+                    width="560" 
+                    height="315" 
+                    src="https://www.youtube.com/embed/uBBDMqZKagY?autoplay=1&mute=1" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                ></iframe>
+            </div>
+            <p>Creating your account...</p>
+        </div>
+    `;
+    document.body.appendChild(loadingScreen);
+
+    // Generate unique ID
+    let userId;
+    do {
+        userId = Math.floor(Math.random() * 9000 + 1000).toString();
+    } while (users.some(u => u.id === userId));
+
+    const newUser = {
+        name: username,
+        id: userId,
+        password: password,
+        email: email,
+        blocked: false,
+        role: "user",
+        registrationDate: new Date().toISOString(),
+        status: "pending",
+        registrationData: {
+            username: username,
+            email: email,
+            registrationDate: new Date().toISOString(),
+            lastAttempt: new Date().toISOString()
+        }
+    };
+
+    // Save registration data to localStorage
+    localStorage.setItem('registrationData', JSON.stringify(newUser.registrationData));
+
+    users.push(newUser);
+    saveUsers();
+
+    // Send email
+    try {
+        await emailjs.send("service_4x8w1qg", "template_4k8v9qg", {
+            to_email: email,
+            to_name: username,
+            message: `Welcome ${username}! Your account has been created successfully.\n\nYour user ID: ${userId}`
+        });
+    } catch (error) {
+        console.error('Email error:', error);
+    }
+
+    // Remove loading
+    loadingScreen.remove();
+
+    alert("Registration successful! Your account is pending approval.\n\nYour account information has been saved for future reference.");
+    showLoginForm();
+    return false; // Prevent form submission
+}
+
+// Login function
+function login(event) {
+    event.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!username || !password) {
+        alert("Please enter both username and password.");
+        return false;
+    }
+
+    const user = users.find(u => u.name.toLowerCase() === username.toLowerCase());
+    if (!user) {
+        alert("User not found. Please register first.");
+        showRegisterForm();
+        return false;
+    }
+
+    if (user.password !== password) {
+        alert("Incorrect password.");
+        return false;
+    }
+
+    if (user.blocked) {
+        alert("Your account is currently blocked. Please contact an administrator.");
+        return false;
+    }
+
+    if (user.status !== 'active') {
+        alert("Your account is pending approval. Please wait for an administrator to approve your account.");
+        return false;
+    }
+
+    localStorage.setItem('currentUser', user.name);
+    localStorage.setItem('currentUserId', user.id);
+    window.location.href = 'welcome.html';
+    return true;
+}
+</script>
+<link rel="manifest" href="manifest.json" />
+
+<style>
+.install-button {
+    display: none;
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    background: #00ff00;
+    color: #000;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.install-button:hover {
+    background: #00cc00;
+}
+
+.install-button.secondary {
+    background-color: #666;
+}
+.install-button.secondary:hover {
+    background-color: #888;
+}
+</style>
+<button id="installButton" class="install-button" style="display: none;">Install School Invincible</button>
+
+</body>
+</html>
